@@ -1,0 +1,1 @@
+exclude: ["node_modules", "Gemfile", "Gemfile.lock", "params.json", "README.md", "gulpfile.js"]

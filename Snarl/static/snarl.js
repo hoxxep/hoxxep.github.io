@@ -9,14 +9,14 @@
     text: description text
     timeout: time in ms | null; for no timeout
     action: string/url | function/callback; action when notification clicked
+    dismissable: bool; if dismiss button is allowed on notification
 
     */
 
     //TODO: add success, error, warning, and custom icons?
     //TODO: add errors when id not found (IndexError?)
-    //TODO: add not dismissable option
-    //TODO: merge addNotification and reopenNotification into
-    // a single openNotification(id, options) class?
+    //TODO: merge addNotification and reopenNotification
+    // into a single openNotification(id, options) class?
     // eg. if no notification exists for id then create a new
     //     one and return new id otherwise reopen existing?
 
@@ -34,7 +34,8 @@
             title: '',
             text: '',
             timeout: 3000,
-            action: null
+            action: null,
+            dismissable: true
         },
 
         setDefaultOptions: function(options) {
@@ -52,6 +53,11 @@
         },
 
         editNotification: function(id, options) {
+            if (Snarl.notifications[id].removeTimer !== null) {
+                clearTimeout(Snarl.notifications[id].removeTimer);
+                Snarl.notifications[id].removeTimer = null;
+            }
+            
             addNotificationHTML(id);
 
             options = options || {};
@@ -65,10 +71,10 @@
             var element = Snarl.notifications[id].element;
 
             //** Title
-            element.getElementsByClassName('title')[0].textContent = options.title;
+            element.getElementsByClassName('snarl-title')[0].textContent = options.title;
 
             //** Text
-            element.getElementsByClassName('text')[0].textContent = options.text;
+            element.getElementsByClassName('snarl-text')[0].textContent = options.text;
 
             //** Timeout
             if (options.timer !== null) {
@@ -85,6 +91,19 @@
             //** Click Action/Callback
             Snarl.notifications[id].action = options.action;
 
+            //** Dismissable
+            if (options.dismissable) {
+                removeClass(element, 'not-dismissable');
+            } else {
+                addClass(element, 'not-dismissable');
+            }
+            
+            // Animate: and yes, it needs to be in a setTimeout for the CSS3 animation to work.
+            setTimeout(function() {
+                addClass(element, 'inbound');
+                element.removeAttribute('style'); //clear reminants of the remove animation
+            }, 0);
+            
             Snarl.notifications[id].options = options;
         },
 
@@ -94,11 +113,16 @@
 
         removeNotification: function(id) {
             if (!Snarl.isDismissed(id)) {
-                //var notification = document.getElementById('snarl-notification-' + id);
                 var notification = Snarl.notifications[id].element;
-                notification.parentElement.removeChild(notification);
+                
+                // animation [& collapse margin]
+                removeClass(notification, 'inbound');
+                notification.style.marginBottom = (-notification.offsetHeight) + 'px';
+                Snarl.notifications[id].removeTimer = setTimeout(function() {
+                    notification.parentElement.removeChild(notification);
+                }, 500);
+                
                 clearTimeout(Snarl.notifications[id].timer);
-                Snarl.notifications[id].active = false;
                 return true;
             } else {
                 return false;  //false if failed to remove
@@ -160,36 +184,32 @@
             return;
         }
 
-        var maxDepth = 5,
-            notification = event.toElement,
+        var notification = event.toElement,
             close = false;
-        while (notification.className.lastIndexOf('snarl-notification') === -1) {
-            if (maxDepth > 0) {
-                if (notification.className.lastIndexOf('snarl-close') !== -1) {
-                    close = true;
-                }
-                notification = notification.parentElement;
-            } else {
-                console.debug('Clicked inside #snarl-wrapper but no notification was found?');
-                return;
+        while (!hasClass(notification, 'snarl-notification')) {
+            if (hasClass(notification, 'snarl-close')) {
+                close = true;
             }
+            notification = notification.parentElement;
         }
 
         var id = notification.getAttribute('id');
         id = /snarl-notification-([a-zA-Z0-9]+)/.exec(id)[1];
 
-        if (close) {
+        if (close && Snarl.notifications[id].options.dismissable) {
             Snarl.removeNotification(id);
         } else {
             var action = Snarl.notifications[id].action;
-            //console.log('clicking: ' + close + ' ' + action);
             if (action === undefined || action === null) {
                 return;
             } else if (typeof action === "string") {
-                //TODO: do this better
+                //TODO: handle url actions better
                 window.location = action;
             } else if (typeof action === "function") {
-                action(); //TODO: add some cb info (what's clicked)
+                action(id);
+            } else {
+                console.log('Snarl Error: Invalid click action:');
+                console.log(action);
             }
         }
     }
@@ -204,10 +224,10 @@
             Snarl.notifications[id] = {};
         }
         if (Snarl.notifications[id].element === null || Snarl.notifications[id].element === undefined) {
-            var notificationContent = '<h3 class="title"></h3><p class="text"></p><div class="snarl-close"><!--<i class="fa fa-close"></i>-->' + snarlCloseSVG + '</div>',
+            var notificationContent = '<h3 class="snarl-title"></h3><p class="snarl-text"></p><div class="snarl-close"><!--<i class="fa fa-close"></i>-->' + snarlCloseSVG + '</div>',
                 notificationWrapper = document.createElement('div');
             notificationWrapper.innerHTML = notificationContent;
-            notificationWrapper.className = 'snarl-notification';
+            addClass(notificationWrapper,'snarl-notification');
             notificationWrapper.setAttribute('id', 'snarl-notification-' + id);
             Snarl.notifications[id].element = notificationWrapper;
         }
@@ -226,6 +246,26 @@
         for (attrname in defaults) {merged[attrname] = defaults[attrname];}
         for (attrname in options) {merged[attrname] = options[attrname];}
         return merged;
+    }
+
+
+    /**
+     * Class manipulation functions
+     */
+    function addClass(element, className) {
+        if (!hasClass(element, className)) {
+            element.className += ' ' + className;
+        }
+    }
+
+    function hasClass(element, className) {
+        var classPattern = new RegExp('(?:^|\\s)' + className + '(?!\\S)', 'g');
+        return (element.className.match(classPattern) !== null);
+    }
+
+    function removeClass(element, className) {
+        var classPattern = new RegExp('(?:^|\\s)' + className + '(?!\\S)', 'g');
+        element.className = element.className.replace(classPattern, '');
     }
 
 

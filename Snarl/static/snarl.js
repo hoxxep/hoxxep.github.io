@@ -57,7 +57,7 @@
                 clearTimeout(Snarl.notifications[id].removeTimer);
                 Snarl.notifications[id].removeTimer = null;
             }
-            
+
             addNotificationHTML(id);
 
             options = options || {};
@@ -97,13 +97,13 @@
             } else {
                 addClass(element, 'not-dismissable');
             }
-            
+
             // Animate: and yes, it needs to be in a setTimeout for the CSS3 animation to work.
             setTimeout(function() {
                 addClass(element, 'inbound');
                 element.removeAttribute('style'); //clear reminants of the remove animation
             }, 0);
-            
+
             Snarl.notifications[id].options = options;
         },
 
@@ -114,14 +114,14 @@
         removeNotification: function(id) {
             if (!Snarl.isDismissed(id)) {
                 var notification = Snarl.notifications[id].element;
-                
+
                 // animation [& collapse margin]
                 removeClass(notification, 'inbound');
                 notification.style.marginBottom = (-notification.offsetHeight) + 'px';
                 Snarl.notifications[id].removeTimer = setTimeout(function() {
                     notification.parentElement.removeChild(notification);
                 }, 500);
-                
+
                 clearTimeout(Snarl.notifications[id].timer);
                 return true;
             } else {

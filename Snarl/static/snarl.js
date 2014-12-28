@@ -103,6 +103,11 @@
                 addClass(element, 'inbound');
                 element.removeAttribute('style'); //clear reminants of the remove animation
             }, 0);
+            
+            // no hover if touch device
+            if (isTouchDevice()) {
+                addClass(element, 'no-hover');
+            }
 
             Snarl.notifications[id].options = options;
         },
@@ -117,7 +122,12 @@
 
                 // animation [& collapse margin]
                 removeClass(notification, 'inbound');
-                notification.style.marginBottom = (-notification.offsetHeight) + 'px';
+                if (document.body.clientWidth > 480) {
+                    notification.style.marginBottom = (-notification.offsetHeight) + 'px';
+                } else {
+                    notification.style.marginTop = (-notification.offsetHeight) + 'px';
+                }
+
                 Snarl.notifications[id].removeTimer = setTimeout(function() {
                     notification.parentElement.removeChild(notification);
                 }, 500);
@@ -232,7 +242,12 @@
             Snarl.notifications[id].element = notificationWrapper;
         }
         if (Snarl.notifications[id].element.parentElement === null) {
-            document.getElementById('snarl-wrapper').appendChild(Snarl.notifications[id].element);
+            var wrapper = document.getElementById('snarl-wrapper');
+            if (document.body.clientWidth > 480) {
+                wrapper.appendChild(Snarl.notifications[id].element);
+            } else {
+                wrapper.insertBefore(Snarl.notifications[id].element, wrapper.firstChild);
+            }
         }
     }
 
@@ -266,6 +281,14 @@
     function removeClass(element, className) {
         var classPattern = new RegExp('(?:^|\\s)' + className + '(?!\\S)', 'g');
         element.className = element.className.replace(classPattern, '');
+    }
+    
+    /**
+     * Check whether the dismiss button needs to be permanently visible
+     * http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
+     */
+    function isTouchDevice() {
+        return ('ontouchstart' in window || 'onmsgesturechange' in window);
     }
 
 

@@ -3,7 +3,7 @@ var gulp = require('gulp'),
 
 gulp.task('snarl', function() {
     return gulp.src('../Snarl/docs/**/*')
-        .pipe(gulp.dest('Snarl/'));
+        .pipe(gulp.dest('snarl/'));
 });
 
 gulp.task('build', ['snarl']);

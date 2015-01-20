@@ -57,7 +57,7 @@
             addNotificationHTML(id);
             Snarl.editNotification(id, options);
 
-            return id;  // allow 3rd party code to track notification
+            return id;
         },
 
         editNotification: function(id, options) {
@@ -79,7 +79,14 @@
             var element = Snarl.notifications[id].element;
 
             //** Title
-            element.getElementsByClassName('snarl-title')[0].textContent = options.title;
+            var title = element.getElementsByClassName('snarl-title')[0];
+            if (options.title) {
+                title.textContent = options.title;
+                removeClass(element, 'snarl-no-title');
+            } else {
+                title.textContent = '';
+                addClass(element, 'snarl-no-title');
+            }
 
             //** Text
             element.getElementsByClassName('snarl-text')[0].textContent = options.text;
@@ -143,7 +150,7 @@
                 clearTimeout(Snarl.notifications[id].timer);
                 return true;
             } else {
-                return false;  //false if failed to remove
+                return false;  //failed to remove
             }
         },
 
@@ -221,7 +228,7 @@
             if (action === undefined || action === null) {
                 return;
             } else if (typeof action === "string") {
-                //TODO: handle url actions better
+                //TODO: allow relative urls too
                 window.location = action;
             } else if (typeof action === "function") {
                 action(id);

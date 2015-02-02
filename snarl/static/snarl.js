@@ -1,6 +1,6 @@
 /*!
  * Snarl - Web Notifications based on Growl
- * @version v0.2.0
+ * @version v0.3.0
  * @link https://hoxxep.github.io/snarl
  *
  * Copyright 2014-2015 Liam Gray <hoxxep@gmail.com>
@@ -30,7 +30,8 @@
         defaultOptions: {
             title: '',
             text: '',
-            timeout: 3000,
+            icon: '',
+            timeout: 5000,
             action: null,
             dismissable: true
         },
@@ -95,6 +96,16 @@
             } else {
                 text.textContent = '';
                 addClass(element, 'snarl-no-text');
+            }
+            
+            //** Icon
+            var icon = element.getElementsByClassName('snarl-icon')[0];
+            if (options.icon) {
+                icon.innerHTML = options.icon;
+                removeClass(element, 'snarl-no-icon');
+            } else {
+                icon.innerHTML = '';
+                addClass(element, 'snarl-no-icon');
             }
 
             //** Timeout
@@ -178,6 +189,10 @@
 
         setText: function(id, text) {
             Snarl.editNotification(id, {text: text});
+        },
+        
+        setIcon: function(id, icon) {
+            Snarl.editNotification(id, {icon: icon});
         },
 
         setTimeout: function(id, timeout) {
@@ -326,7 +341,7 @@
         snarlWrapper.addEventListener('click', clickNotification);
         document.body.appendChild(snarlWrapper);
         
-        Snarl.setNotificationHTML('<div class="snarl-notification waves-effect"><h3 class="snarl-title"></h3><p class="snarl-text"></p><div class="snarl-close waves-effect"><svg class="snarl-close-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve" height="100px" width="100px"><g><path d="M49.5,5c-24.9,0-45,20.1-45,45s20.1,45,45,45s45-20.1,45-45S74.4,5,49.5,5z M71.3,65.2c0.3,0.3,0.5,0.7,0.5,1.1   s-0.2,0.8-0.5,1.1L67,71.8c-0.3,0.3-0.7,0.5-1.1,0.5s-0.8-0.2-1.1-0.5L49.5,56.6L34.4,71.8c-0.3,0.3-0.7,0.5-1.1,0.5   c-0.4,0-0.8-0.2-1.1-0.5l-4.3-4.4c-0.3-0.3-0.5-0.7-0.5-1.1c0-0.4,0.2-0.8,0.5-1.1L43,49.9L27.8,34.9c-0.6-0.6-0.6-1.6,0-2.3   l4.3-4.4c0.3-0.3,0.7-0.5,1.1-0.5c0.4,0,0.8,0.2,1.1,0.5l15.2,15l15.2-15c0.3-0.3,0.7-0.5,1.1-0.5s0.8,0.2,1.1,0.5l4.3,4.4   c0.6,0.6,0.6,1.6,0,2.3L56.1,49.9L71.3,65.2z"/></g></svg></div></div>');
+        Snarl.setNotificationHTML('<div class="snarl-notification waves-effect"><div class="snarl-icon"></div><h3 class="snarl-title"></h3><p class="snarl-text"></p><div class="snarl-close waves-effect"><svg class="snarl-close-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve" height="100px" width="100px"><g><path d="M49.5,5c-24.9,0-45,20.1-45,45s20.1,45,45,45s45-20.1,45-45S74.4,5,49.5,5z M71.3,65.2c0.3,0.3,0.5,0.7,0.5,1.1   s-0.2,0.8-0.5,1.1L67,71.8c-0.3,0.3-0.7,0.5-1.1,0.5s-0.8-0.2-1.1-0.5L49.5,56.6L34.4,71.8c-0.3,0.3-0.7,0.5-1.1,0.5   c-0.4,0-0.8-0.2-1.1-0.5l-4.3-4.4c-0.3-0.3-0.5-0.7-0.5-1.1c0-0.4,0.2-0.8,0.5-1.1L43,49.9L27.8,34.9c-0.6-0.6-0.6-1.6,0-2.3   l4.3-4.4c0.3-0.3,0.7-0.5,1.1-0.5c0.4,0,0.8,0.2,1.1,0.5l15.2,15l15.2-15c0.3-0.3,0.7-0.5,1.1-0.5s0.8,0.2,1.1,0.5l4.3,4.4   c0.6,0.6,0.6,1.6,0,2.3L56.1,49.9L71.3,65.2z"/></g></svg></div></div>');
     }
 
     (function () {
